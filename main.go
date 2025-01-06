@@ -1,7 +1,20 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"go-Phones/handlers"
+	"go-Phones/tools"
+	"log"
+	"net/http"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	fmt.Println("Server Starting....")
+
+	http.HandleFunc("/", handlers.WelcomePage)
+
+	log.Println("Server StopApp Running....")
+	tools.StopApp()
+
+	log.Println("Main End..")
 }
