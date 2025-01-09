@@ -1,24 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"go-Phones/handlers"
 	"go-Phones/tools"
-	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+	log.Info().Msg("Server Starting....")
+
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	fmt.Println("Server Starting....")
-
 	http.HandleFunc("/", handlers.WelcomePage)
 
-	log.Println("Server StopApp Running....")
+	log.Info().Msg("Server StopApp Running....")
 	tools.StopApp()
 
-	log.Println("Main End..")
+	log.Info().Msg("Main End..")
 }
