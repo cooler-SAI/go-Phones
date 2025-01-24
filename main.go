@@ -2,23 +2,15 @@ package main
 
 import (
 	"database/sql"
+	"go-Phones/database"
 	"go-Phones/handlers"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	_ "modernc.org/sqlite"
 )
-
-const createTableQuery = `
-CREATE TABLE IF NOT EXISTS phones (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    brand TEXT NOT NULL,
-    price REAL NOT NULL
-);`
 
 func main() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
@@ -26,7 +18,7 @@ func main() {
 
 	log.Info().Msg("Server starting...")
 
-	db, err := connectDB()
+	db, err := database.ConnectDB()
 	if err != nil {
 		log.Fatal().Err(err)
 	}
@@ -37,7 +29,7 @@ func main() {
 		}
 	}(db)
 
-	if err := setupDB(db); err != nil {
+	if err := database.SetupDB(db); err != nil {
 		log.Fatal().Err(err)
 	}
 
@@ -52,33 +44,4 @@ func main() {
 	if err2 != nil {
 		return
 	}
-}
-
-func connectDB() (*sql.DB, error) {
-	dbPath := "phones.db"
-	absolutePath, _ := filepath.Abs(dbPath)
-	log.Info().Msgf("Absolute path to database: %s", absolutePath)
-
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := db.Ping(); err != nil {
-		return nil, err
-	}
-
-	log.Info().Msg("Database connection established")
-	return db, nil
-}
-
-func setupDB(db *sql.DB) error {
-	log.Info().Msg("Setting up database...")
-	_, err := db.Exec(createTableQuery)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to execute createTableQuery")
-	} else {
-		log.Info().Msg("Table 'phones' created or already exists")
-	}
-	return err
 }
