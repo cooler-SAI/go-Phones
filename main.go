@@ -5,6 +5,7 @@ import (
 	"go-Phones/handlers"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -54,8 +55,10 @@ func main() {
 }
 
 func connectDB() (*sql.DB, error) {
-	dbPath := "./phones.db"
-	log.Info().Msgf("Connecting to database at path: %s", dbPath)
+	dbPath := "phones.db"
+	absolutePath, _ := filepath.Abs(dbPath)
+	log.Info().Msgf("Absolute path to database: %s", absolutePath)
+
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, err
