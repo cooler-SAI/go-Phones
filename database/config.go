@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS phones (
 );`
 
 func ConnectDB() (*sql.DB, error) {
-	dbPath := "phones.db"
+	dbPath := "database/phones.db"
 	absolutePath, _ := filepath.Abs(dbPath)
 	log.Info().Msgf("Absolute path to database: %s", absolutePath)
 
