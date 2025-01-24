@@ -14,9 +14,12 @@ var (
 )
 
 func init() {
-	addPhoneCmd.Flags().StringVarP(&name, "name", "n", "", "Phone name (required)")
-	addPhoneCmd.Flags().StringVarP(&brand, "brand", "b", "", "Phone brand (required)")
-	addPhoneCmd.Flags().Float64VarP(&price, "price", "p", 0.0, "Phone price (required)")
+	addPhoneCmd.Flags().StringVarP(&name, "name", "n", "",
+		"Phone name (required)")
+	addPhoneCmd.Flags().StringVarP(&brand, "brand", "b", "",
+		"Phone brand (required)")
+	addPhoneCmd.Flags().Float64VarP(&price, "price", "p", 0.0,
+		"Phone price (required)")
 
 	err := addPhoneCmd.MarkFlagRequired("name")
 	if err != nil {
@@ -50,7 +53,8 @@ var addPhoneCmd = &cobra.Command{
 			}
 		}(db)
 
-		_, err = db.Exec("INSERT INTO phones (name, brand, price) VALUES (?, ?, ?)", name, brand, price)
+		_, err = db.Exec("INSERT INTO phones (name, brand, price) VALUES (?, ?, ?)",
+			name, brand, price)
 		if err != nil {
 			fmt.Printf("Error inserting phone into database: %v\n", err)
 			return
