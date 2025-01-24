@@ -54,7 +54,9 @@ func main() {
 }
 
 func connectDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite", "phones.db")
+	dbPath := "./phones.db"
+	log.Info().Msgf("Connecting to database at path: %s", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, err
 	}
@@ -62,10 +64,18 @@ func connectDB() (*sql.DB, error) {
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
+
+	log.Info().Msg("Database connection established")
 	return db, nil
 }
 
 func setupDB(db *sql.DB) error {
+	log.Info().Msg("Setting up database...")
 	_, err := db.Exec(createTableQuery)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to execute createTableQuery")
+	} else {
+		log.Info().Msg("Table 'phones' created or already exists")
+	}
 	return err
 }
