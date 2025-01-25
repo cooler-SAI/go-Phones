@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"go-Phones/database"
 	"go-Phones/handlers"
+	"go-Phones/shlex" // Импортируем наш пакет shlex
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -63,39 +62,17 @@ func main() {
 	fmt.Println("Enter commands (e.g., .add-phone <model> <brand> <price>):")
 	for scanner.Scan() {
 		input := scanner.Text()
-		args := strings.Fields(input)
 
-		if len(args) == 0 {
+		// Разбиваем строку на аргументы с учётом кавычек
+		args, err := shlex.Split(input)
+		if err != nil {
+			fmt.Println("Failed to parse input:", err)
 			continue
 		}
 
-		switch args[0] {
-		case ".add-phone":
-			if len(args) != 4 {
-				fmt.Println("Usage: .add-phone <model> <brand> <price>")
-				continue
-			}
-
-			price, err := strconv.Atoi(args[3])
-			if err != nil {
-				fmt.Println("Invalid price:", err)
-				continue
-			}
-
-			phone := database.Phone{
-				Model: args[1],
-				Brand: args[2],
-				Price: price,
-			}
-
-			if err := database.AddPhone(db, phone); err != nil {
-				fmt.Println("Failed to add phone:", err)
-			} else {
-				fmt.Println("Phone added successfully!")
-			}
-
-		default:
-			fmt.Println("Unknown command:", args[0])
+		// Обрабатываем команду
+		if err := shlex.ProcessCommand(db, args); err != nil {
+			fmt.Println("Error:", err)
 		}
 	}
 }
