@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
+	"html/template"
 	"net/http"
+	"os"
 )
 
 var DB *sql.DB
@@ -12,8 +13,27 @@ func SetDB(db *sql.DB) {
 	DB = db
 }
 
+// WelcomePage отображает главную страницу
 func WelcomePage(w http.ResponseWriter, _ *http.Request) {
-	rows, err := DB.Query("SELECT name, brand, price FROM phones")
+	// Читаем HTML из файла
+	htmlContent, err := os.ReadFile("html/welcome.html")
+	if err != nil {
+		http.Error(w, "Failed to load HTML template", http.StatusInternalServerError)
+		return
+	}
+
+	// Отправляем HTML клиенту
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, err = w.Write(htmlContent)
+	if err != nil {
+		return
+	}
+}
+
+// PhoneListPage отображает список телефонов
+func PhoneListPage(w http.ResponseWriter, _ *http.Request) {
+	// Запрос данных из базы
+	rows, err := DB.Query("SELECT model, brand, price FROM phones")
 	if err != nil {
 		http.Error(w, "Failed to fetch data", http.StatusInternalServerError)
 		return
@@ -25,19 +45,36 @@ func WelcomePage(w http.ResponseWriter, _ *http.Request) {
 		}
 	}(rows)
 
+	// Собираем данные в срез
+	var phones []struct {
+		Model string
+		Brand string
+		Price float64
+	}
 	for rows.Next() {
-		var name, brand string
+		var model, brand string
 		var price float64
-		err := rows.Scan(&name, &brand, &price)
-		if err != nil {
+		if err := rows.Scan(&model, &brand, &price); err != nil {
+			http.Error(w, "Failed to read data", http.StatusInternalServerError)
 			return
 		}
-		write, err := w.Write([]byte(name + " - " + brand + " - " +
-			fmt.Sprintf("%.2f", price) + "\n"))
-		if err != nil {
-			return
-		}
-		fmt.Printf("Written %d bytes\n", write)
+		phones = append(phones, struct {
+			Model string
+			Brand string
+			Price float64
+		}{model, brand, price})
+	}
 
+	// Читаем HTML-шаблон из файла
+	tmpl, err := template.ParseFiles("html/phone_list.html")
+	if err != nil {
+		http.Error(w, "Failed to load HTML template", http.StatusInternalServerError)
+		return
+	}
+
+	// Применяем шаблон и отправляем результат клиенту
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := tmpl.Execute(w, phones); err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
 	}
 }

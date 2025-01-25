@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome</title>
+    <title>Phone List</title>
     <link rel="stylesheet" href="/static/css/welcome.css">
 </head>
 <body>
-<h1>Hello! Welcome to the Phone Site!</h1>
-<p><a href="/phones">View Phone List</a></p>
+<h1>Phone List:</h1>
+<ul>
+    {{range .}}
+    <li>{{.Model}} - {{.Brand}} - ${{.Price}}</li>
+    {{end}}
+</ul>
 </body>
 </html>

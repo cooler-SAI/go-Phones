@@ -38,7 +38,7 @@ func main() {
 	// Проверяем аргументы командной строки
 	if len(os.Args) > 1 {
 		// Если переданы аргументы, запускаем CLI
-		if err := commands.Execute(db); err != nil { // Передаём db в commands. Execute
+		if err := commands.Execute(db); err != nil {
 			log.Fatal().Err(err).Msg("CLI execution error")
 		}
 		return
@@ -46,7 +46,9 @@ func main() {
 
 	// Если аргументов нет, запускаем веб-сервер
 	log.Info().Msg("Welcome to the Phones Web Server Application!")
-	log.Info().Msg("Server will run at http://localhost:8080")
+	log.Info().Msg("Server is running!")
+	log.Info().Msg("Main page: http://localhost:8080")
+	log.Info().Msg("Phone list: http://localhost:8080/phones")
 
 	// Установим базу данных для обработчиков
 	handlers.SetDB(db)
@@ -54,9 +56,10 @@ func main() {
 	// Запуск веб-сервера
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/", handlers.WelcomePage)
+	http.HandleFunc("/", handlers.WelcomePage)         // Главная страница
+	http.HandleFunc("/phones", handlers.PhoneListPage) // Страница со списком телефонов
 
-	log.Info().Msg("Server running at http://localhost:8080")
+	// Запуск сервера
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal().Err(err).Msg("Server failed")
 	}
