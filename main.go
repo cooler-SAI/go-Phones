@@ -18,19 +18,6 @@ func main() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	// Проверяем аргументы командной строки
-	if len(os.Args) > 1 {
-		// Если переданы аргументы, запускаем CLI
-		if err := commands.Execute(); err != nil {
-			log.Fatal().Err(err).Msg("CLI execution error")
-		}
-		return
-	}
-
-	// Если аргументов нет, запускаем веб-сервер
-	log.Info().Msg("Welcome to the Phones Web Server Application!")
-	log.Info().Msg("Server will run at http://localhost:8080")
-
 	// Инициализация базы данных
 	db, err := database.ConnectDB()
 	if err != nil {
@@ -43,10 +30,23 @@ func main() {
 		}
 	}(db)
 
-	// Настройка базы данных
+	// Настройка базы данных (создание таблицы, если её нет)
 	if err := database.SetupDB(db); err != nil {
 		log.Fatal().Err(err).Msg("Failed to set up database")
 	}
+
+	// Проверяем аргументы командной строки
+	if len(os.Args) > 1 {
+		// Если переданы аргументы, запускаем CLI
+		if err := commands.Execute(db); err != nil { // Передаём db в commands. Execute
+			log.Fatal().Err(err).Msg("CLI execution error")
+		}
+		return
+	}
+
+	// Если аргументов нет, запускаем веб-сервер
+	log.Info().Msg("Welcome to the Phones Web Server Application!")
+	log.Info().Msg("Server will run at http://localhost:8080")
 
 	// Установим базу данных для обработчиков
 	handlers.SetDB(db)
