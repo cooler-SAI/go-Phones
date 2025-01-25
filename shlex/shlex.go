@@ -8,12 +8,10 @@ import (
 	"strconv"
 )
 
-// Split разбивает строку на аргументы с учётом кавычек.
 func Split(input string) ([]string, error) {
 	return shlex.Split(input)
 }
 
-// ProcessCommand обрабатывает команды из консоли.
 func ProcessCommand(db *sql.DB, args []string) error {
 	if len(args) == 0 {
 		return nil
@@ -37,7 +35,8 @@ func ProcessCommand(db *sql.DB, args []string) error {
 		}
 
 		if err := database.AddPhone(db, phone); err != nil {
-			return fmt.Errorf("failed to add phone: %v", err)
+			return fmt.Errorf(
+				"failed to add phone: %v", err)
 		}
 
 		fmt.Println("Phone added successfully!")
